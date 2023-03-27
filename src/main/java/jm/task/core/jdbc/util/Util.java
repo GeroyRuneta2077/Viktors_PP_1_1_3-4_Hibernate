@@ -29,7 +29,7 @@ public class Util {
 
     private static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
-            return new Configuration().addProperties(properties).addAnnotatedClass(User.class)
+            sessionFactory = new Configuration().addProperties(properties).addAnnotatedClass(User.class)
                     .buildSessionFactory();
         }
         return sessionFactory;
