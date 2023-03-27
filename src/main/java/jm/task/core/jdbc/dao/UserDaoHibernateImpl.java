@@ -2,8 +2,8 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
@@ -28,8 +28,7 @@ public class UserDaoHibernateImpl implements UserDao {
     }
 
     private void SQLQuery(String sql) {
-        SessionFactory sessionFactory = Util.createSessionFactory();
-        Session session = sessionFactory.getCurrentSession();
+        Session session = Util.getSession();
 
         try {
             session.beginTransaction();
@@ -37,21 +36,17 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createSQLQuery(sql).executeUpdate();
 
             session.getTransaction().commit();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             if (session.getTransaction() != null) {
                 session.getTransaction().rollback();
             }
             System.out.println("Exception during C/D operation: " + e);
-        } finally {
-            sessionFactory.close();
         }
-
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        SessionFactory sessionFactory = Util.createSessionFactory();
-        Session session = sessionFactory.getCurrentSession();
+        Session session = Util.getSession();
 
         try {
             session.beginTransaction();
@@ -60,20 +55,17 @@ public class UserDaoHibernateImpl implements UserDao {
 
             session.getTransaction().commit();
             System.out.println("User с именем - " + name + " добавлен в базу данных");
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             if (session.getTransaction() != null) {
                 session.getTransaction().rollback();
             }
             System.out.println("Saving failed, reason: " + e);
-        } finally {
-            sessionFactory.close();
         }
     }
 
     @Override
     public void removeUserById(long id) {
-        SessionFactory sessionFactory = Util.createSessionFactory();
-        Session session = sessionFactory.getCurrentSession();
+        Session session = Util.getSession();
 
         try {
             session.beginTransaction();
@@ -82,28 +74,26 @@ public class UserDaoHibernateImpl implements UserDao {
             session.delete(user);
 
             session.getTransaction().commit();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             if (session.getTransaction() != null) {
                 session.getTransaction().rollback();
             }
             System.out.println("Deleting failed, reason: " + e);
-        } finally {
-            sessionFactory.close();
         }
     }
 
     @Override
     public List<User> getAllUsers() {
         List<User> result = null;
+        Session session = Util.getSession();
 
-        try (SessionFactory sessionFactory = Util.createSessionFactory()) {
-            Session session = sessionFactory.getCurrentSession();
+        try {
             session.beginTransaction();
 
             result = session.createQuery("FROM User").getResultList();
 
             session.getTransaction().commit();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             System.out.println(e);
         }
         return result;
@@ -111,8 +101,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void cleanUsersTable() {
-        SessionFactory sessionFactory = Util.createSessionFactory();
-        Session session = sessionFactory.getCurrentSession();
+        Session session = Util.getSession();
 
         try {
             session.beginTransaction();
@@ -120,13 +109,11 @@ public class UserDaoHibernateImpl implements UserDao {
             session.createQuery("DELETE FROM User").executeUpdate();
 
             session.getTransaction().commit();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             if (session.getTransaction() != null) {
                 session.getTransaction().rollback();
             }
             System.out.println("Exception during deleting: " + e);
-        } finally {
-            sessionFactory.close();
         }
     }
 }

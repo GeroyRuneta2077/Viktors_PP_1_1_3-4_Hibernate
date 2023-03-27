@@ -1,6 +1,7 @@
 package jm.task.core.jdbc.util;
 
 import jm.task.core.jdbc.model.User;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -10,6 +11,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class Util {
+    private static SessionFactory sessionFactory;
     private static final String url = "jdbc:mysql://localhost:3306/first";
     private static final String user = "root";
     private static final String pswd = "root";
@@ -25,9 +27,16 @@ public class Util {
         properties.setProperty("hibernate.current_session_context_class", "thread");
     }
 
-    public static SessionFactory createSessionFactory() {
-        return new Configuration().addProperties(properties).addAnnotatedClass(User.class)
-                .buildSessionFactory();
+    private static SessionFactory getSessionFactory() {
+        if (sessionFactory == null) {
+            return new Configuration().addProperties(properties).addAnnotatedClass(User.class)
+                    .buildSessionFactory();
+        }
+        return sessionFactory;
+    }
+
+    public static Session getSession() {
+        return getSessionFactory().getCurrentSession();
     }
 
     public static Connection getConnection() throws SQLException {
